@@ -18,10 +18,6 @@ UseTrigger=1
 TriggerName=main
 LimitSize=0
 ByteLimit=50
-[Disassemble mode]
-mode=0
-[Breakpoints2]
-Count=0
 [Log file]
 LoggingEnabled=_ 0
 LogFile=_ ""
@@ -29,9 +25,6 @@ Category=_ 0
 [TermIOLog]
 LoggingEnabled=_ 0
 LogFile=_ ""
-[Aliases]
-Count=0
-SuppressDialog=0
 [CallStack]
 ShowArgs=0
 [Disassembly]
@@ -44,8 +37,8 @@ Symbiont=0
 Exclusions=
 [JLinkDriver]
 WatchCond=_ 0
-Watch0=_ 0 "0x00000000" 4294967295 "0xFFFFFFFF" 0 "0x00000000" 4294967295 "0xFFFFFFFF" 3 0 0 0
-Watch1=_ 0 "0x00000000" 4294967295 "0xFFFFFFFF" 0 "0x00000000" 4294967295 "0xFFFFFFFF" 3 0 0 0
+Watch0=_ 0 "" 0 "" 0 "" 0 "" 0 0 0 0
+Watch1=_ 0 "" 0 "" 0 "" 0 "" 0 0 0 0
 CStepIntDis=_ 0
 ETM_Cookie=ID100_127104120001100101001
 ETM_Reg_GeneralControl=0x00002C08
@@ -159,3 +152,10 @@ TraceShowTimeFreq=1000000
 Enabled=0
 [CallStackStripe]
 ShowTiming=216
+[Disassemble mode]
+mode=0
+[Breakpoints2]
+Count=0
+[Aliases]
+Count=0
+SuppressDialog=0
