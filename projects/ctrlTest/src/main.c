@@ -14,6 +14,8 @@
 #include <buttons.h>
 #include <interface.h>
 #include <control.h>
+#include <can.h>
+#include "messages.h"
 
 /*************************************************************************
 *                  PRIORITIES
@@ -61,6 +63,7 @@ static void appTaskCheckOutput(void *pdata);
 int main() {
   /* Initialise the hardware */
   bspInit();
+  canInit();
   controlInit();
 
   /* Initialise the OS */
@@ -103,9 +106,24 @@ int main() {
 static void appTaskItemReady(void *pdata)
 {
   osStartTick();
+  message padLoaded;
+  padLoaded.type = INPUTPAD_LOADED;
+  canMessage_t m;
+  m.id = INPUT_ROBOT_ID;
+  m.len = 2;
+  m.dataA = (uint32_t) padLoaded.type<< 16 | padLoaded.mData;
+  
   while(1)
   {
     ledToggle(USB_LINK_LED);
+     if (controlItemPresent(CONTROL_SENSOR_1)) {
+        interfaceLedSetState(D4_LED, LED_ON);
+        //send INPUT_PAD_LOADED on CAN
+        canWrite(CAN_PORT_1, &m);     
+    } 
+     else {
+        interfaceLedSetState(D4_LED, LED_OFF);
+     }
     OSTimeDly(500);
   }
 }

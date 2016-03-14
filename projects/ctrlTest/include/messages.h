@@ -8,7 +8,7 @@
 #define CONTROLLER_ID 12
 
 //All CAN messages
-typedef emum mType{
+typedef enum {
     START,
     ERROR,
     PAUSE,
@@ -32,7 +32,7 @@ typedef emum mType{
 
 //Message consists of message type plus optional data.
 typedef struct{
-    messageType type,
+    messageType type;
     uint16_t mData;
 } message;
 
