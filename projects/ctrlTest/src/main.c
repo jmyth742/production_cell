@@ -21,7 +21,10 @@
 
 enum {
   APP_TASK_MONITOR_SENS_PRIO = 4,
-  APP_TASK_CTRL_PRIO
+  APP_TASK_CTRL_PRIO,
+  APP_TASK_ITEMREADY_PRIO,
+  APP_TASK_CHECKPICKUP_PRIO,
+  APP_TASK_CHECKOUTPUT_PRIO
 };
 
 /*************************************************************************
@@ -30,19 +33,27 @@ enum {
 
 enum {
   APP_TASK_MONITOR_SENS_STK_SIZE = 256,
-  APP_TASK_CTRL_STK_SIZE = 256
+  APP_TASK_CTRL_STK_SIZE = 256,
+  STK_SIZE = 256
 };
 
-static OS_STK appTaskMonitorSensStk[APP_TASK_MONITOR_SENS_STK_SIZE];
-static OS_STK appTaskCtrlStk[APP_TASK_CTRL_STK_SIZE];
+//static OS_STK appTaskMonitorSensStk[APP_TASK_MONITOR_SENS_STK_SIZE];
+//static OS_STK appTaskCtrlStk[APP_TASK_CTRL_STK_SIZE];
+
+static OS_STK appTaskItemReadyStk[STK_SIZE];
+static OS_STK appTaskCheckOutputStk[STK_SIZE];
+static OS_STK appTaskCheckPickupStk[STK_SIZE];
 
 /*************************************************************************
 *                  APPLICATION FUNCTION PROTOTYPES
 *************************************************************************/
 
-static void appTaskMonitorSens(void *pdata);
-static void appTaskCtrl(void *pdata);
+//static void appTaskMonitorSens(void *pdata);
+//static void appTaskCtrl(void *pdata);
 
+static void appTaskItemReady(void *pdata);
+static void appTaskCheckPickup(void *pdata);
+static void appTaskCheckOutput(void *pdata);
 /*************************************************************************
 *                    GLOBAL FUNCTION DEFINITIONS
 *************************************************************************/
@@ -56,15 +67,27 @@ int main() {
   OSInit();                                                   
 
   /* Create Tasks */
-  OSTaskCreate(appTaskMonitorSens,                               
+//  OSTaskCreate(appTaskMonitorSens,                               
+//               (void *)0,
+//               (OS_STK *)&appTaskMonitorSensStk[APP_TASK_MONITOR_SENS_STK_SIZE - 1],
+//               APP_TASK_MONITOR_SENS_PRIO);
+//   
+//  OSTaskCreate(appTaskCtrl,                               
+//               (void *)0,
+//               (OS_STK *)&appTaskCtrlStk[APP_TASK_CTRL_STK_SIZE - 1],
+//               APP_TASK_CTRL_PRIO);
+    OSTaskCreate(appTaskItemReady,                               
                (void *)0,
-               (OS_STK *)&appTaskMonitorSensStk[APP_TASK_MONITOR_SENS_STK_SIZE - 1],
-               APP_TASK_MONITOR_SENS_PRIO);
-   
-  OSTaskCreate(appTaskCtrl,                               
+               (OS_STK *)&appTaskItemReadyStk[STK_SIZE - 1],
+               APP_TASK_ITEMREADY_PRIO);
+    OSTaskCreate(appTaskCheckPickup,                               
                (void *)0,
-               (OS_STK *)&appTaskCtrlStk[APP_TASK_CTRL_STK_SIZE - 1],
-               APP_TASK_CTRL_PRIO);
+               (OS_STK *)&appTaskCheckOutputStk[STK_SIZE - 1],
+               APP_TASK_CHECKPICKUP_PRIO);
+    OSTaskCreate(appTaskCheckOutput,                               
+               (void *)0,
+               (OS_STK *)&appTaskCheckPickupStk[STK_SIZE - 1],
+               APP_TASK_CHECKOUTPUT_PRIO);
    
   /* Start the OS */
   OSStart();                                                  
@@ -77,50 +100,82 @@ int main() {
 *                   APPLICATION TASK DEFINITIONS
 *************************************************************************/
 
-static void appTaskMonitorSens(void *pdata) {
-    
-  /* Start the OS ticker
-   * (must be done in the highest priority task)
-   */
+static void appTaskItemReady(void *pdata)
+{
   osStartTick();
-  
-  /* 
-   * Now execute the main task loop for this task
-   */
-  while (true) {
-    interfaceLedSetState(D1_LED | D2_LED, LED_OFF);
-    ledSetState(USB_LINK_LED, LED_OFF);
-    ledSetState(USB_CONNECT_LED, LED_OFF);
-    
-    if (controlItemPresent(CONTROL_SENSOR_1)) {
-        interfaceLedSetState(D1_LED, LED_ON);
-        ledSetState(USB_LINK_LED, LED_ON);
-    } 
-    if (controlItemPresent(CONTROL_SENSOR_2)) {
-        interfaceLedSetState(D2_LED, LED_ON);
-        ledSetState(USB_CONNECT_LED, LED_ON);
-    } 
-    
-    OSTimeDly(20);
+  while(1)
+  {
+    ledToggle(USB_LINK_LED);
+    OSTimeDly(500);
   }
 }
 
-static void appTaskCtrl(void *pdata) {
-  static bool emergency = false;
-  interfaceLedSetState(D3_LED | D4_LED, LED_OFF);
-  
-  while (true) {
-    emergency = controlEmergencyStopButtonPressed();
-    if (emergency) {
-      controlAlarmToggleState();
-      interfaceLedSetState(D4_LED, LED_ON);
-      while (controlEmergencyStopButtonPressed()) {
-        OSTimeDly(20);
-      }
-    } else {
-      interfaceLedSetState(D4_LED, LED_OFF);
-    }
-    OSTimeDly(20);
-  } 
+static void appTaskCheckPickup(void *pdata)
+{
+  char state = 1;
+  while(1)
+  {
+    state = !state;
+    interfaceLedSetState(D2_LED, state);
+    OSTimeDly(500);
+  }
 }
+
+static void appTaskCheckOutput(void *pdata)
+{
+  char state = 0;
+  while(1)
+  {
+    state = !state;
+    interfaceLedSetState(D1_LED, state);
+    OSTimeDly(500);
+  }
+}
+
+//static void appTaskMonitorSens(void *pdata) {
+//    
+//  /* Start the OS ticker
+//   * (must be done in the highest priority task)
+//   */
+//  osStartTick();
+//  
+//  /* 
+//   * Now execute the main task loop for this task
+//   */
+//  while (true) {
+//    interfaceLedSetState(D1_LED | D2_LED, LED_OFF);
+//    ledSetState(USB_LINK_LED, LED_OFF);
+//    ledSetState(USB_CONNECT_LED, LED_OFF);
+//    
+//    if (controlItemPresent(CONTROL_SENSOR_1)) {
+//        interfaceLedSetState(D1_LED, LED_ON);
+//        ledSetState(USB_LINK_LED, LED_ON);
+//    } 
+//    if (controlItemPresent(CONTROL_SENSOR_2)) {
+//        interfaceLedSetState(D2_LED, LED_ON);
+//        ledSetState(USB_CONNECT_LED, LED_ON);
+//    } 
+//    
+//    OSTimeDly(20);
+//  }
+//}
+//
+//static void appTaskCtrl(void *pdata) {
+//  static bool emergency = false;
+//  interfaceLedSetState(D3_LED | D4_LED, LED_OFF);
+//  
+//  while (true) {
+//    emergency = controlEmergencyStopButtonPressed();
+//    if (emergency) {
+//      controlAlarmToggleState();
+//      interfaceLedSetState(D4_LED, LED_ON);
+//      while (controlEmergencyStopButtonPressed()) {
+//        OSTimeDly(20);
+//      }
+//    } else {
+//      interfaceLedSetState(D4_LED, LED_OFF);
+//    }
+//    OSTimeDly(20);
+//  } 
+//}
 

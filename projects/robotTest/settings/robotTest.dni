@@ -1,13 +1,10 @@
 [DebugChecksum]
-Checksum=-1534364312
+Checksum=-487579508
 [Exceptions]
 StopOnUncaught=_ 0
 StopOnThrow=_ 0
 [CodeCoverage]
 Enabled=_ 0
-[Trace1]
-Enabled=0
-ShowSource=1
 [Stack]
 FillEnabled=0
 OverflowWarningsEnabled=1
@@ -18,23 +15,10 @@ UseTrigger=1
 TriggerName=main
 LimitSize=0
 ByteLimit=50
-[Log file]
-LoggingEnabled=_ 0
-LogFile=_ ""
-Category=_ 0
-[TermIOLog]
-LoggingEnabled=_ 0
-LogFile=_ ""
 [CallStack]
 ShowArgs=0
 [Disassembly]
 MixedMode=1
-[DriverProfiling]
-Enabled=0
-Mode=1
-Graph=0
-Symbiont=0
-Exclusions=
 [JLinkDriver]
 WatchCond=_ 0
 Watch0=_ 0 "" 0 "" 0 "" 0 "" 0 0 0 0
@@ -148,14 +132,32 @@ ETM_Reg_SynchronizationFrequency=0x00000400
 TraceBufferSize=0x00000000
 TraceShowTime=0
 TraceShowTimeFreq=1000000
+[Trace1]
+Enabled=0
+ShowSource=1
+[Log file]
+LoggingEnabled=_ 0
+LogFile=_ ""
+Category=_ 0
+[TermIOLog]
+LoggingEnabled=_ 0
+LogFile=_ ""
+[DriverProfiling]
+Enabled=0
+Mode=1
+Graph=0
+Symbiont=0
+Exclusions=
 [CallStackLog]
 Enabled=0
 [CallStackStripe]
-ShowTiming=216
+ShowTiming=1
 [Disassemble mode]
 mode=0
 [Breakpoints2]
 Count=0
 [Aliases]
-Count=0
-SuppressDialog=0
+A0=_ "C:\Users\dave\Dropbox\Industrial_project\dk0-pcell-fd115bde695d\bsp\src\pwm.c" "C:\Users\dave\Dropbox\Industrial_project\code\bsp\src\pwm.c"
+A1=_ "C:\Users\dave\Dropbox\Industrial_project\dk0-pcell-fd115bde695d\projects\robotTest\src\main.c" ""
+Count=2
+SuppressDialog=1
