@@ -17,23 +17,7 @@ enum {PWM_MAJOR_CYCLE_HZ = 50};
  * for the hand joint is 45000/1000000 of the major cycle time,
  * i.e. duty cycle time = (20 * (45000/1000000) = 0.9ms
  */
-enum {
-  DUMMY_MIN = 45000,
-  HAND_MIN = 45000,
-  WRIST_MIN = 45000,
-  ELBOW_MIN = 45000,
-  WAIST_MIN = 45000,
-  DUMMY_MAX = 100000,
-  HAND_MAX  = 100000,
-  WRIST_MAX = 100000,
-  ELBOW_MAX = 100000,
-  WAIST_MAX = 100000,
-  DUMMY_NEUTRAL = 72500,
-  HAND_NEUTRAL = 68750,
-  WRIST_NEUTRAL = 82250,
-  ELBOW_NEUTRAL = 87500,
-  WAIST_NEUTRAL = 67250,
-};
+
 
 static const uint32_t jointMinPos[5] = {DUMMY_MIN, HAND_MIN, WRIST_MIN, ELBOW_MIN, WAIST_MIN};
 static const uint32_t jointMaxPos[5] = {DUMMY_MAX, HAND_MAX, WRIST_MAX, ELBOW_MAX, WAIST_MAX};

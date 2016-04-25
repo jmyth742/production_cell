@@ -1,24 +1,24 @@
-"C:\Users\dave\Dropbox\Industrial_project\code\cell\src\robot.c"
+"C:\Users\dave\Dropbox\Industrial_project\code\projects\ctrlTest\src\buffer.c"
 -std=c99
 -ferror-limit=100
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.3\arm\INC\NXP
 -I
-C:\Users\dave\Dropbox\Industrial_project\code\projects\robotTest\include
+C:\Users\dave\Dropbox\Industrial_project\code\projects\ctrlTest\include
 -I
-C:\Users\dave\Dropbox\Industrial_project\code\projects\robotTest\..\..\bsp\include
+C:\Users\dave\Dropbox\Industrial_project\code\projects\ctrlTest\..\..\bsp\include
 -I
-C:\Users\dave\Dropbox\Industrial_project\code\projects\robotTest\..\..\cell\include
+C:\Users\dave\Dropbox\Industrial_project\code\projects\ctrlTest\..\..\cell\include
 -I
-C:\Users\dave\Dropbox\Industrial_project\code\projects\robotTest\..\..\Micrium\Software\ucos-ii\ports\arm\generic\iar
+C:\Users\dave\Dropbox\Industrial_project\code\projects\ctrlTest\..\..\Micrium\Software\ucos-ii\ports\arm\generic\iar
 -I
-C:\Users\dave\Dropbox\Industrial_project\code\projects\robotTest\..\..\Micrium\Software\ucos-ii\source
+C:\Users\dave\Dropbox\Industrial_project\code\projects\ctrlTest\..\..\Micrium\Software\ucos-ii\source
 -I
-C:\Users\dave\Dropbox\Industrial_project\code\projects\robotTest\..\..\Micrium\Software\uc-lib
+C:\Users\dave\Dropbox\Industrial_project\code\projects\ctrlTest\..\..\Micrium\Software\uc-lib
 -I
-C:\Users\dave\Dropbox\Industrial_project\code\projects\robotTest\..\..\Micrium\Software\uc-cpu
+C:\Users\dave\Dropbox\Industrial_project\code\projects\ctrlTest\..\..\Micrium\Software\uc-cpu
 -I
-C:\Users\dave\Dropbox\Industrial_project\code\projects\robotTest\..\..\Micrium\Software\uc-cpu\arm\IAR
+C:\Users\dave\Dropbox\Industrial_project\code\projects\ctrlTest\..\..\Micrium\Software\uc-cpu\arm\IAR
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.3\arm\inc
 -I
@@ -26,7 +26,7 @@ C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.3\arm\inc\c
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.3\arm\INC\NXP
 -I
-C:\Users\dave\Dropbox\Industrial_project\code\projects\robotTest\include
+C:\Users\dave\Dropbox\Industrial_project\code\projects\ctrlTest\include
 -I
 C:\Users\dave\Dropbox\Industrial_project\code\bsp\include
 -I

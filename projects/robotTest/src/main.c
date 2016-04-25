@@ -89,40 +89,16 @@ static void appTaskButtons(void *pdata) {
   lcdWrite("WAIST:%08u", robotJointGetState(ROBOT_WAIST));
   
   /* the main task loop for this task  */
+  int led = 1;
   while (true) {
-    btnState = buttonsRead();
-    if (isButtonPressedInState(btnState, JS_RIGHT)) {
-      jsRightPressed = true;
-    }
-    if (jsRightPressed && (!isButtonPressedInState(btnState, JS_RIGHT))) {
-      jsRightPressed = false;
-      interfaceLedSetState(leds[joint], LED_OFF);
-      joint += 1;
-      if (joint > N_JOINTS) {
-        joint = 1;
-      }
-    }
-    if (isButtonPressedInState(btnState, JS_LEFT)) {
-      jsLeftPressed = true;
-    }
-    if (jsLeftPressed && (!isButtonPressedInState(btnState, JS_LEFT))) {
-      jsLeftPressed = false;
-      interfaceLedSetState(leds[joint], LED_OFF);
-      joint -= 1;
-      if (joint == 0) {
-        joint = N_JOINTS;
-      }
-    }
-    interfaceLedSetState(leds[joint], LED_ON);
+
     
-    if (isButtonPressedInState(btnState, JS_UP)) {
-      robotJointSetState((robotJoint_t)joint, ROBOT_JOINT_POS_INC);
-      lcdSetTextPos(8, 6+joint);
-      lcdWrite("%08u", robotJointGetState((robotJoint_t)joint));
-    } else if (isButtonPressedInState(btnState, JS_DOWN)) {
-      robotJointSetState((robotJoint_t)joint, ROBOT_JOINT_POS_DEC);
-      lcdSetTextPos(8, 6+joint);
-      lcdWrite("%08u", robotJointGetState((robotJoint_t)joint));
+    if () {//robotJointGetState(ROBOT_ELBOW) > ELBOW_MAX
+      interfaceLedSetState(leds[joint], ~led);
+      robotJointSetState(ROBOT_ELBOW, ROBOT_JOINT_POS_INC);
+    }
+    else if ()) {//isButtonPressedInState(btnState, JS_DOWN
+      robotJointSetState(ROBOT_ELBOW, ROBOT_JOINT_POS_DEC);
     }
     OSTimeDly(20);
   }                       

@@ -7,6 +7,8 @@
 #define OUTPUT_ROBOT_ID 9
 #define CONTROLLER_ID 12
 
+#define ATTEMPTS = 3 //system fails after
+
 //All CAN messages
 typedef enum {
     START,
