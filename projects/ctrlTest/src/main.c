@@ -11,22 +11,23 @@
 #include <bsp.h>
 #include <osutils.h>
 #include <leds.h>
+#include <lcd.h>
 #include <buttons.h>
 #include <interface.h>
 #include <control.h>
 #include <can.h>
 #include "messages.h"
 #include "canbuffer.h"
+#include "controller2.h"
 
 /*************************************************************************
 *                  PRIORITIES
 *************************************************************************/
 
 enum {
-  APP_TASK_CAN_PRIO = 4,
-  APP_TASK_CTRL_PRIO,
-  APP_TASK_ITEMREADY_PRIO,
+  APP_TASK_CTRL_PRIO = 4,
   APP_TASK_CHECKPICKUP_PRIO,
+  APP_TASK_ITEMREADY_PRIO,
   APP_TASK_CHECKOUTPUT_PRIO,
   APP_TASK_DUMMY_PRIO
 };
@@ -41,9 +42,7 @@ enum {
   STK_SIZE = 256
 };
 
-static OS_STK appTaskCanStk[APP_TASK_MONITOR_SENS_STK_SIZE];
-//static OS_STK appTaskCtrlStk[APP_TASK_CTRL_STK_SIZE];
-
+static OS_STK appTaskCtrlStk[APP_TASK_CTRL_STK_SIZE];
 static OS_STK appTaskItemReadyStk[STK_SIZE];
 static OS_STK appTaskCheckOutputStk[STK_SIZE];
 static OS_STK appTaskCheckPickupStk[STK_SIZE];
@@ -53,9 +52,7 @@ static OS_STK appTaskDummyStk[STK_SIZE];
 *                  APPLICATION FUNCTION PROTOTYPES
 *************************************************************************/
 
-static void appTaskCan(void *pdata);
-//static void appTaskCtrl(void *pdata);
-
+static void appTaskCtrl(void *pdata);
 static void appTaskItemReady(void *pdata);
 static void appTaskCheckPickup(void *pdata);
 static void appTaskCheckOutput(void *pdata);
@@ -63,28 +60,25 @@ static void appTaskDummy(void *pdata);
 /*************************************************************************
 *                    GLOBAL FUNCTION DEFINITIONS
 *************************************************************************/
+bool StartupChecks(void);
 
-bool isRunning, isStopped, isPaused, error;
+static bool isRunning, isStopped, isPaused, error;
 
 int main() {
   /* Initialise the hardware */
   bspInit();
   canInit();
   controlInit();
+  //canBufferInit();
 
   /* Initialise the OS */
   OSInit();                                                   
 
-  /* Create Tasks */
-  OSTaskCreate(appTaskCan,                               
+  /* Create Tasks */ 
+    OSTaskCreate(appTaskCtrl,                               
                (void *)0,
-               (OS_STK *)&appTaskCanStk[STK_SIZE - 1],
-               APP_TASK_CAN_PRIO);
-   
-//  OSTaskCreate(appTaskCtrl,                               
-//               (void *)0,
-//               (OS_STK *)&appTaskCtrlStk[APP_TASK_CTRL_STK_SIZE - 1],
-//               APP_TASK_CTRL_PRIO);
+               (OS_STK *)&appTaskCtrlStk[APP_TASK_CTRL_STK_SIZE - 1],
+               APP_TASK_CTRL_PRIO); 
     OSTaskCreate(appTaskItemReady,                               
                (void *)0,
                (OS_STK *)&appTaskItemReadyStk[STK_SIZE - 1],
@@ -93,17 +87,22 @@ int main() {
                (void *)0,
                (OS_STK *)&appTaskCheckOutputStk[STK_SIZE - 1],
                APP_TASK_CHECKPICKUP_PRIO);
-    OSTaskCreate(appTaskCheckOutput,                               
-               (void *)0,
-               (OS_STK *)&appTaskCheckPickupStk[STK_SIZE - 1],
-               APP_TASK_CHECKOUTPUT_PRIO);
-    OSTaskCreate(appTaskDummy,                               
-               (void *)0,
-               (OS_STK *)&appTaskDummyStk[STK_SIZE - 1],
-               APP_TASK_DUMMY_PRIO);
+//    OSTaskCreate(appTaskCheckOutput,                               
+//               (void *)0,
+//               (OS_STK *)&appTaskCheckPickupStk[STK_SIZE - 1],
+//               APP_TASK_CHECKOUTPUT_PRIO);
+//    OSTaskCreate(appTaskDummy,                               
+//               (void *)0,
+//               (OS_STK *)&appTaskDummyStk[STK_SIZE - 1],
+//               APP_TASK_DUMMY_PRIO);
    
-  /* Start the OS */
-  OSStart();                                                  
+  //pre start checks
+    if(StartupChecks()) {
+      OSStart();  
+    }     
+    else {
+    
+    }
   
   /* Should never arrive here */ 
   return 0;      
@@ -112,44 +111,35 @@ int main() {
 /*************************************************************************
 *                   APPLICATION TASK DEFINITIONS
 *************************************************************************/
+
 /*
- *   grabs messages from the CAN bus an buffers them.
- */
-static void appTaskCan(void *pdata)
-{
-  osStartTick();
-  static canMessage_t m;
-  
-  while(1){
-    if(canReady(CAN_PORT_1)){
-      canRead(CAN_PORT_1, &m);
-      if(m.id == CONTROLLER_ID){
-        
-      }
-    }  
-    OSTimeDly(5);
-  }
-}
-/*
- *  Sends input_pad_loaded message if pad 1 sensor active.
+ *  Sends input_pad_loaded message if pad 1 sensor active. ---------------------------------------------------------------------------------
  */
 static void appTaskItemReady(void *pdata)
 {
-  
-  static canMessage_t m = {INPUT_ROBOT_ID, 2, INPUTPAD_LOADED, 0 };
-  
+  static canMessage_t m = {INPUT_ROBOT_ID, 4, INPUTPAD_LOADED, 0};
+  bool sent;
   while(1)
   {
-    ledToggle(USB_LINK_LED);
      if (controlItemPresent(CONTROL_SENSOR_1)) {
         interfaceLedSetState(D4_LED, LED_ON);
         //send INPUT_PAD_LOADED on CAN
-        canWrite(CAN_PORT_1, &m);     
+        if(!sent){
+          canWrite(CAN_PORT_1, &m);  
+          lcdSetTextPos(1,1);
+          lcdWrite("ID: %i sent", m.id);      
+          sent = true;
+        }
     } 
      else {
         interfaceLedSetState(D4_LED, LED_OFF);
+        //lcdSetTextPos(1,1);
+        //lcdWrite("no item    ");
+        sent = false;
      }
-    OSTimeDly(500);
+//     state = !state;
+//    interfaceLedSetState(D1_LED, (ledState_t)state);
+    OSTimeDly(800);
   }
 }
 /*
@@ -158,40 +148,52 @@ static void appTaskItemReady(void *pdata)
  */
 static void appTaskCheckPickup(void *pdata)
 {
+  //osStartTick();
   char state = 1;
-  static canMessage_t m;
-  static canMessage_t ok   ={INPUT_ROBOT_ID, 2, PICKUP_OK, 0};
-  static canMessage_t fail ={INPUT_ROBOT_ID, 2, PICKUP_FAILED, 0};
+  static canMessage_t m; 
+  static canMessage_t ok = {INPUT_ROBOT_ID, 4, PICKUP_OK, 0};
+  static canMessage_t fail = {INPUT_ROBOT_ID, 4, PICKUP_FAILED, 0};
   static int attempts = 0;
   while(1)
   {
-    //<-- pickup_attempted
-    canRead(CAN_PORT_1, &m);
-    if((m.id == CONTROLLER_ID) && (m.dataA == PICKUP_ATTEMPTED)){
-      //check output pad clear
-      if (controlItemPresent(CONTROL_SENSOR_1)) {
-        //pickup failed
-        canWrite(CAN_PORT_1, &fail);
-        attempts++;
-        interfaceLedSetState(D3_LED, LED_ON);
-        if(attempts > 3){
-          //non recoverable error
-          //todo --- stop the thing ----------------------------------- !!!
+//    //<-- pickup_attempted
+    if(canReady(CAN_PORT_1)){
+      canRead(CAN_PORT_1, &m);
+      lcdSetTextPos(0,0);
+      lcdWrite("id: %i m: %i", m.id, m.dataA);
+      if((m.id == CONTROLLER_ID) && (m.dataA == PICKUP_ATTEMPTED)){
+        //check output pad clear
+        if (controlItemPresent(CONTROL_SENSOR_1)) {
+          //pickup failed
+          canWrite(CAN_PORT_1, &fail);
+          lcdSetTextPos(1,6);
+          lcdWrite("Sent pickupFail");
+          
+          attempts++;
+          interfaceLedSetState(D3_LED, LED_ON);
+          if(attempts > 3){
+            lcdSetTextPos(1,8);
+            lcdWrite("Robot 1 Fail");
+            //non recoverable error
+            //todo --- stop the thing ----------------------------------- !!!
+            attempts = 0;
+          }   
+        }
+        else {
+          //pad is clear
+          
           attempts = 0;
-        }   
+          interfaceLedSetState(D3_LED, LED_OFF);
+          lcdSetTextPos(1,8);
+          lcdWrite("Sent pickupOK");
+          //--> ack_remove
+          canWrite(CAN_PORT_1, &ok);
+        }  
       }
-      else {
-        //pad is clear
-        canWrite(CAN_PORT_1, &ok);
-        attempts = 0;
-        interfaceLedSetState(D3_LED, LED_OFF);
-        //--> ack_remove
-      }  
     }
-
     state = !state;
     interfaceLedSetState(D2_LED, (ledState_t)state);
-    OSTimeDly(500);
+    OSTimeDly(100);
   }
 }
 
@@ -206,17 +208,19 @@ static void appTaskCheckOutput(void *pdata)
   static canMessage_t ack = {OUTPUT_ROBOT_ID, 2, ACK_REMOVEBLOCK, 0};
   while(1)
   {
-    canRead(CAN_PORT_1, &m);
-    if((m.id == CONTROLLER_ID)&&(m.dataA == REQ_REMOVEBLOCK)){
-      //request recieved from robot 2
-      if (controlItemPresent(CONTROL_SENSOR_2)){
-        //output pad is clear, send ack.
-        canWrite(CAN_PORT_1, &ack);  
+    if(canReady(CAN_PORT_1)){
+      canRead(CAN_PORT_1, &m);
+      if((m.id == CONTROLLER_ID)&&(m.dataA == REQ_REMOVEBLOCK)){
+        //request recieved from robot 2
+        if (controlItemPresent(CONTROL_SENSOR_2)){
+          //output pad is clear, send ack.
+          canWrite(CAN_PORT_1, &ack);  
+        }
       }
+      state = !state;
+      interfaceLedSetState(D1_LED, (ledState_t)state);
+      OSTimeDly(500);
     }
-    state = !state;
-    interfaceLedSetState(D1_LED, (ledState_t)state);
-    OSTimeDly(500);
   }
 }
 
@@ -231,51 +235,42 @@ static void appTaskDummy(void *pdata)
     OSTimeDly(500);
   }
 }
-
-//static void appTaskMonitorSens(void *pdata) {
-//    
-//  /* Start the OS ticker
-//   * (must be done in the highest priority task)
-//   */
-//  osStartTick();
-//  
-//  /* 
-//   * Now execute the main task loop for this task
-//   */
-//  while (true) {
-//    interfaceLedSetState(D1_LED | D2_LED, LED_OFF);
-//    ledSetState(USB_LINK_LED, LED_OFF);
-//    ledSetState(USB_CONNECT_LED, LED_OFF);
-//    
-//    if (controlItemPresent(CONTROL_SENSOR_1)) {
-//        interfaceLedSetState(D1_LED, LED_ON);
-//        ledSetState(USB_LINK_LED, LED_ON);
-//    } 
-//    if (controlItemPresent(CONTROL_SENSOR_2)) {
-//        interfaceLedSetState(D2_LED, LED_ON);
-//        ledSetState(USB_CONNECT_LED, LED_ON);
-//    } 
-//    
-//    OSTimeDly(20);
-//  }
-//}
 //
-//static void appTaskCtrl(void *pdata) {
-//  static bool emergency = false;
-//  interfaceLedSetState(D3_LED | D4_LED, LED_OFF);
-//  
-//  while (true) {
-//    emergency = controlEmergencyStopButtonPressed();
-//    if (emergency) {
-//      controlAlarmToggleState();
-//      interfaceLedSetState(D4_LED, LED_ON);
-//      while (controlEmergencyStopButtonPressed()) {
+//void readyLightToggle(void);
+//void runningLightToggle(void);
+//void pausedLightToggle(void);
+//void emergencyLightToggle(void);
+//bool startBtn(void);
+//bool pauseBtn(void);
+//bool errorBtn(void);
+//bool emergencyBtn(void);
+static void appTaskCtrl(void *pdata) {
+  osStartTick();
+  static bool emergency = false;
+  interfaceLedSetState(D3_LED | D4_LED, LED_OFF);
+  
+  while (true) {
+   emergency = controlEmergencyStopButtonPressed();
+    if (emergency) {
+      controlAlarmToggleState();
+      //emergencyLightToggle();
+      //while (emergency) {
 //        OSTimeDly(20);
 //      }
-//    } else {
-//      interfaceLedSetState(D4_LED, LED_OFF);
-//    }
-//    OSTimeDly(20);
-//  } 
-//}
+    } else {
+      //emergencyLightToggle();
+      //controlAlarmToggleState();
+    }
+    OSTimeDly(500);
+  } 
+}
 
+/*
+ *  Start the OS if startup checks OK
+ */
+bool StartupChecks()
+{
+  static canMessage_t m;
+  m.id = CONVEYOR_ID;
+  return true;
+}

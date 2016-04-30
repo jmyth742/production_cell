@@ -11,22 +11,22 @@
     mBufHasNext = OSSemCreate(0);
   }
   
-  void canBufferPut(canMessage_t * msg){
+  void canBufferPut(canMessage_t  msg){
     OSSemPend(mBufEmptySlot, 0, &error); // Check for an empty slot
     OSSemPend(mBufMutex, 0, &error); // get mutex access to buffer
     
-      buffer[start] = *msg;
+      buffer[start] = msg;
       start = (start + 1) % BUFF_SIZE;
       
     error = OSSemPost(mBufMutex); // release buffer
     error = OSSemPost(mBufHasNext); //update hasNext
   }
 
-  void canBufferGet(canMessage_t *msg){
+  void canBufferGet(canMessage_t msg){
     OSSemPend(mBufHasNext, 0, &error);  // check the buffer has an item
     OSSemPend(mBufMutex, 0, &error); // get mutex access to buffer
     
-      *msg = buffer[end];
+      msg = buffer[end];
       end = (end + 1) % BUFF_SIZE;
       
     error = OSSemPost(mBufMutex); // release buffer

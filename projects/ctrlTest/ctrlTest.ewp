@@ -1192,10 +1192,13 @@
     <group>
       <name>include</name>
       <file>
-        <name>$PROJ_DIR$\include\buffer.h</name>
+        <name>$PROJ_DIR$\include\canbuffer.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\include\canbuffer.h</name>
+        <name>$PROJ_DIR$\include\controller.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\include\controller2.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\include\messages.h</name>
@@ -1206,9 +1209,6 @@
     </group>
     <group>
       <name>src</name>
-      <file>
-        <name>$PROJ_DIR$\src\buffer.c</name>
-      </file>
       <file>
         <name>$PROJ_DIR$\src\canbuffer.c</name>
       </file>

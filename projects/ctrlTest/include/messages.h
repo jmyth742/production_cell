@@ -32,10 +32,5 @@ typedef enum {
     REMOVE_OK
 } messageType;
 
-//Message consists of message type plus optional data.
-typedef struct{
-    messageType type;
-    uint16_t mData;
-} message;
 
 #endif // MESSAGES_H_INCLUDED

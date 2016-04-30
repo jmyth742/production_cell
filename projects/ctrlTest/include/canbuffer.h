@@ -12,6 +12,6 @@
  static OS_EVENT *mBufHasNext;  
 
 void canBufferInit(void);
-void canBufferPut(canMessage_t *);
-void canBufferGet(canMessage_t *);
+void canBufferPut(canMessage_t);
+void canBufferGet(canMessage_t);
 #endif
