@@ -122,7 +122,7 @@ TraceBufferSize=0x00000000
 TraceShowTime=0
 TraceShowTimeFreq=1000000
 [DebugChecksum]
-Checksum=627779804
+Checksum=-1004381135
 [Exceptions]
 StopOnUncaught=_ 0
 StopOnThrow=_ 0
@@ -138,7 +138,8 @@ ShowSource=1
 [Disassemble mode]
 mode=0
 [Breakpoints2]
-Count=0
+Bp0=_ 0 "EMUL_CODE" "{$PROJ_DIR$\include\controller.c}.3.1" 0 0 1 "" 0 "" 0
+Count=1
 [Log file]
 LoggingEnabled=_ 0
 LogFile=_ ""

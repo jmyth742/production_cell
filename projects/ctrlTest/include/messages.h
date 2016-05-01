@@ -8,9 +8,11 @@
 #define CONTROLLER_ID 12
 
 #define ATTEMPTS = 3 //system fails after
+#define MSIZE = 4 //message size
 
 //All CAN messages
 typedef enum {
+    //STARTUP,
     START,
     ERROR,
     PAUSE,

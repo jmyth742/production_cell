@@ -18,7 +18,7 @@
 #include <can.h>
 #include "messages.h"
 #include "canbuffer.h"
-#include "controller2.h"
+#include "controller.h"
 
 /*************************************************************************
 *                  PRIORITIES
@@ -69,7 +69,6 @@ int main() {
   bspInit();
   canInit();
   controlInit();
-  //canBufferInit();
 
   /* Initialise the OS */
   OSInit();                                                   
@@ -98,6 +97,7 @@ int main() {
    
   //pre start checks
     if(StartupChecks()) {
+      //readyLightToggle();
       OSStart();  
     }     
     else {
@@ -118,28 +118,28 @@ int main() {
 static void appTaskItemReady(void *pdata)
 {
   static canMessage_t m = {INPUT_ROBOT_ID, 4, INPUTPAD_LOADED, 0};
-  bool sent;
+  bool sent, state;
   while(1)
   {
      if (controlItemPresent(CONTROL_SENSOR_1)) {
         interfaceLedSetState(D4_LED, LED_ON);
         //send INPUT_PAD_LOADED on CAN
-        if(!sent){
+        //if(!sent){
           canWrite(CAN_PORT_1, &m);  
           lcdSetTextPos(1,1);
-          lcdWrite("ID: %i sent", m.id);      
+          lcdWrite("ID: %i M: %i sent", m.id, m.dataA);      
           sent = true;
-        }
+        //}
     } 
      else {
         interfaceLedSetState(D4_LED, LED_OFF);
-        //lcdSetTextPos(1,1);
-        //lcdWrite("no item    ");
+        lcdSetTextPos(1,1);
+        lcdWrite("                 ");
         sent = false;
      }
-//     state = !state;
-//    interfaceLedSetState(D1_LED, (ledState_t)state);
-    OSTimeDly(800);
+    state = !state;
+    interfaceLedSetState(D3_LED, (ledState_t)state);
+    OSTimeDly(500);
   }
 }
 /*
@@ -148,7 +148,6 @@ static void appTaskItemReady(void *pdata)
  */
 static void appTaskCheckPickup(void *pdata)
 {
-  //osStartTick();
   char state = 1;
   static canMessage_t m; 
   static canMessage_t ok = {INPUT_ROBOT_ID, 4, PICKUP_OK, 0};
@@ -162,6 +161,8 @@ static void appTaskCheckPickup(void *pdata)
       lcdSetTextPos(0,0);
       lcdWrite("id: %i m: %i", m.id, m.dataA);
       if((m.id == CONTROLLER_ID) && (m.dataA == PICKUP_ATTEMPTED)){
+        lcdSetTextPos(1,8);
+        lcdWrite("Pickup Attempted");
         //check output pad clear
         if (controlItemPresent(CONTROL_SENSOR_1)) {
           //pickup failed
@@ -172,7 +173,7 @@ static void appTaskCheckPickup(void *pdata)
           attempts++;
           interfaceLedSetState(D3_LED, LED_ON);
           if(attempts > 3){
-            lcdSetTextPos(1,8);
+            lcdSetTextPos(1,7);
             lcdWrite("Robot 1 Fail");
             //non recoverable error
             //todo --- stop the thing ----------------------------------- !!!
@@ -180,12 +181,11 @@ static void appTaskCheckPickup(void *pdata)
           }   
         }
         else {
-          //pad is clear
-          
+          //pad is clear       
           attempts = 0;
           interfaceLedSetState(D3_LED, LED_OFF);
-          lcdSetTextPos(1,8);
-          lcdWrite("Sent pickupOK");
+          lcdSetTextPos(1,6);
+          lcdWrite("Sent pickupOK ");
           //--> ack_remove
           canWrite(CAN_PORT_1, &ok);
         }  
@@ -270,7 +270,40 @@ static void appTaskCtrl(void *pdata) {
  */
 bool StartupChecks()
 {
+  bool inReady, outReady, convReady, sysReady;
+  //static canMessage_t startUpMsg = {0, 4, STARTUP, 0};
   static canMessage_t m;
-  m.id = CONVEYOR_ID;
+  //canWrite(CAN_PORT_1, &startUpMsg);
+  
+  //lcdSetTextPos(1,1);
+  //lcdWrite("Run System Checks");
+  
+//   while(!sysReady)
+//   {
+//     if(canReady(CAN_PORT_1)){
+//      canRead(CAN_PORT_1, &m);
+//      if(m.dataA == INPUT_READY){
+//        inReady = true;  
+//        lcdSetTextPos(1,3);
+//        lcdWrite("Input Robot OK");
+//      }
+//                   
+//      else if(m.dataA == OUTPUT_READY){
+//        outReady = true;
+//        lcdSetTextPos(1,4);
+//        lcdWrite("Output Robot OK");
+//      }
+//                      
+//      else if(m.dataA == CONVEYOR_READY){
+//        convReady = true;
+//        lcdSetTextPos(1, 4);
+//        lcdWrite("Conveyor OK");
+//      }     
+//     }
+//     sysReady = (inReady && outReady && convReady);
+//   }
+   //lcdWrite(char(0x0c));
+
+  
   return true;
 }

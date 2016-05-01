@@ -20,6 +20,7 @@ typedef enum lights{
   Emergency
 } Lamp;
 
+bool toggleStart(void);
 
 void readyLightToggle(void);
 void runningLightToggle(void);
