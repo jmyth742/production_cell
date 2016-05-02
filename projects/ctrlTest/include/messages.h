@@ -12,10 +12,11 @@
 
 //All CAN messages
 typedef enum {
-    //STARTUP,
+    STARTUP,
     START,
     ERROR,
     PAUSE,
+    UNPAUSE,
     STOP,
     INPUT_READY,
     OUTPUT_READY,

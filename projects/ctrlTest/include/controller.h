@@ -6,19 +6,6 @@
 #include <interface.h>
 #include <control.h>
 
-typedef enum ctrlButtons{
-  TogStart,
-  TogPause,
-  Error,
-  Reset
-} Button;
-
-typedef enum lights{
-  Ready,
-  Running,
-  Paused,
-  Emergency
-} Lamp;
 
 bool toggleStart(void);
 

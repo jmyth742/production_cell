@@ -1,36 +1,18 @@
 #include "controller.h"
-static bool isReady, isRunning;  
-bool toggleStart()
-{
-    if(isReady)
-    {
-      if(!isRunning)
-      {
-        isRunning = true;
-        return true;
-      }
-      else
-      {
-        return false;
-      }
-    }
-    return false;
-}
-
 
 void readyLightToggle()
 {
-  ledToggle(USB_LINK_LED);
+  interfaceLedToggle(D1_LED);
 }
 
 void runningLightToggle()
 {
-  ledToggle(USB_CONNECT_LED);
+  interfaceLedToggle(D2_LED);
 }
 
 void pausedLightToggle()
 {
-  interfaceLedToggle(D1_LED);
+  interfaceLedToggle(D3_LED);
 }
 
 void emergencyLightToggle()
@@ -40,22 +22,22 @@ void emergencyLightToggle()
 
 bool startBtn()
 {
-  isButtonPressed(BUT_1);
+  return isButtonPressed(BUT_1);
 }
 
 bool pauseBtn()
 {
-  isButtonPressed(BUT_2);
+  return isButtonPressed(BUT_2);
 }
 
 bool errorBtn()
 {
-  isButtonPressed(JS_CENTRE);
+  return isButtonPressed(JS_CENTRE);
 }
 
 bool emergencyBtn()
 {
-  controlEmergencyStopButtonPressed();
+  return controlEmergencyStopButtonPressed();
 }
 
 

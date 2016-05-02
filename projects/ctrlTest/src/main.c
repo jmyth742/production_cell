@@ -62,7 +62,7 @@ static void appTaskDummy(void *pdata);
 *************************************************************************/
 bool StartupChecks(void);
 
-static bool isRunning, isStopped, isPaused, error;
+static bool isRunning, isPaused, error;
 
 int main() {
   /* Initialise the hardware */
@@ -97,11 +97,12 @@ int main() {
    
   //pre start checks
     if(StartupChecks()) {
-      //readyLightToggle();
+      readyLightToggle();
       OSStart();  
     }     
     else {
-    
+      lcdSetTextPos(1,1);
+      lcdWrite("Failed startup checks");
     }
   
   /* Should never arrive here */ 
@@ -118,28 +119,20 @@ int main() {
 static void appTaskItemReady(void *pdata)
 {
   static canMessage_t m = {INPUT_ROBOT_ID, 4, INPUTPAD_LOADED, 0};
-  bool sent, state;
   while(1)
   {
-     if (controlItemPresent(CONTROL_SENSOR_1)) {
-        interfaceLedSetState(D4_LED, LED_ON);
-        //send INPUT_PAD_LOADED on CAN
-        //if(!sent){
-          canWrite(CAN_PORT_1, &m);  
-          lcdSetTextPos(1,1);
-          lcdWrite("ID: %i M: %i sent", m.id, m.dataA);      
-          sent = true;
-        //}
-    } 
-     else {
-        interfaceLedSetState(D4_LED, LED_OFF);
-        lcdSetTextPos(1,1);
-        lcdWrite("                 ");
-        sent = false;
-     }
-    state = !state;
-    interfaceLedSetState(D3_LED, (ledState_t)state);
-    OSTimeDly(500);
+    if(isRunning && !isPaused){
+       if (controlItemPresent(CONTROL_SENSOR_1)) {
+          interfaceLedSetState(D4_LED, LED_ON);
+          //send INPUT_PAD_LOADED on CAN
+            canWrite(CAN_PORT_1, &m);      
+      } 
+       else {
+          interfaceLedSetState(D4_LED, LED_OFF);
+       }
+      ledToggle(USB_LINK_LED);
+      OSTimeDly(500);
+    }
   }
 }
 /*
@@ -148,7 +141,6 @@ static void appTaskItemReady(void *pdata)
  */
 static void appTaskCheckPickup(void *pdata)
 {
-  char state = 1;
   static canMessage_t m; 
   static canMessage_t ok = {INPUT_ROBOT_ID, 4, PICKUP_OK, 0};
   static canMessage_t fail = {INPUT_ROBOT_ID, 4, PICKUP_FAILED, 0};
@@ -191,8 +183,7 @@ static void appTaskCheckPickup(void *pdata)
         }  
       }
     }
-    state = !state;
-    interfaceLedSetState(D2_LED, (ledState_t)state);
+    ledToggle(USB_CONNECT_LED);
     OSTimeDly(100);
   }
 }
@@ -201,67 +192,85 @@ static void appTaskCheckPickup(void *pdata)
  *    Checks the output pad when a request to deposit from
  *    robot 2 is recieved. If pad is clear sends an ack.
  */
-static void appTaskCheckOutput(void *pdata)
-{
-  char state = 0;
-  static canMessage_t m;
-  static canMessage_t ack = {OUTPUT_ROBOT_ID, 2, ACK_REMOVEBLOCK, 0};
-  while(1)
-  {
-    if(canReady(CAN_PORT_1)){
-      canRead(CAN_PORT_1, &m);
-      if((m.id == CONTROLLER_ID)&&(m.dataA == REQ_REMOVEBLOCK)){
-        //request recieved from robot 2
-        if (controlItemPresent(CONTROL_SENSOR_2)){
-          //output pad is clear, send ack.
-          canWrite(CAN_PORT_1, &ack);  
-        }
-      }
-      state = !state;
-      interfaceLedSetState(D1_LED, (ledState_t)state);
-      OSTimeDly(500);
-    }
-  }
-}
+//static void appTaskCheckOutput(void *pdata)
+//{
+//  static canMessage_t m;
+//  static canMessage_t ack = {OUTPUT_ROBOT_ID, 2, ACK_REMOVEBLOCK, 0};
+//  while(1)
+//  {
+//    if(canReady(CAN_PORT_1)){
+//      canRead(CAN_PORT_1, &m);
+//      if((m.id == CONTROLLER_ID)&&(m.dataA == REQ_REMOVEBLOCK)){
+//        //request recieved from robot 2
+//        if (controlItemPresent(CONTROL_SENSOR_2)){
+//          //output pad is clear, send ack.
+//          canWrite(CAN_PORT_1, &ack);  
+//        }
+//      }
+//      
+//      OSTimeDly(500);
+//    }
+//  }
+//}
 
-static void appTaskDummy(void *pdata)
-{
-  char state = 0;
-  while(1)
-  {
-    state = !state;
-    //interfaceLedSetState(D1_LED, state);
-    ledSetState(USB_CONNECT_LED, (ledState_t)state);
-    OSTimeDly(500);
-  }
-}
-//
+//static void appTaskDummy(void *pdata)
+//{
+//  while(1)
+//  {
+//    ledToggle(USB_LINK_LED);
+//    OSTimeDly(500);
+//  }
+//}
+
+
 //void readyLightToggle(void);
 //void runningLightToggle(void);
 //void pausedLightToggle(void);
 //void emergencyLightToggle(void);
-//bool startBtn(void);
-//bool pauseBtn(void);
-//bool errorBtn(void);
-//bool emergencyBtn(void);
 static void appTaskCtrl(void *pdata) {
   osStartTick();
-  static bool emergency = false;
-  interfaceLedSetState(D3_LED | D4_LED, LED_OFF);
-  
-  while (true) {
-   emergency = controlEmergencyStopButtonPressed();
-    if (emergency) {
-      controlAlarmToggleState();
-      //emergencyLightToggle();
-      //while (emergency) {
-//        OSTimeDly(20);
-//      }
-    } else {
-      //emergencyLightToggle();
-      //controlAlarmToggleState();
+  canMessage_t m;
+  m.len = 4;
+  while (true) {    
+    if(startBtn()){
+      isRunning = !isRunning;
+      runningLightToggle();
+      if(isRunning){
+        m.dataA = STOP;
+        canWrite(CAN_PORT_1, &m);
+      }else {
+        m.dataA = START;
+        canWrite(CAN_PORT_1, &m);
+      }
+        
+    } 
+    if(pauseBtn()){
+      isPaused = !isPaused;
+      pausedLightToggle();
+      if(isPaused){
+        m.dataA = UNPAUSE;
+        canWrite(CAN_PORT_1, &m);
+      } else{
+        m.dataA = PAUSE;
+        canWrite(CAN_PORT_1, &m); 
+      }
+       
     }
-    OSTimeDly(500);
+    if(errorBtn()){
+     // m.dataA = RESET;
+      //canWrite(CAN_PORT_1, &m); 
+      //reset
+      //error = !error;
+    }
+    if(emergencyBtn()){
+      error = !error;
+      emergencyLightToggle();
+      controlAlarmToggleState();
+      m.dataA = ERROR;
+      canWrite(CAN_PORT_1, &m); 
+    }
+    
+    OSTimeDly(350);
   } 
 }
 
@@ -271,13 +280,13 @@ static void appTaskCtrl(void *pdata) {
 bool StartupChecks()
 {
   bool inReady, outReady, convReady, sysReady;
-  //static canMessage_t startUpMsg = {0, 4, STARTUP, 0};
+  static canMessage_t startUpMsg = {0, 4, STARTUP, 0};
   static canMessage_t m;
-  //canWrite(CAN_PORT_1, &startUpMsg);
   
-  //lcdSetTextPos(1,1);
-  //lcdWrite("Run System Checks");
   
+  lcdSetTextPos(1,1);
+  lcdWrite("Run System Checks");
+  canWrite(CAN_PORT_1, &startUpMsg);
 //   while(!sysReady)
 //   {
 //     if(canReady(CAN_PORT_1)){
@@ -296,14 +305,14 @@ bool StartupChecks()
 //                      
 //      else if(m.dataA == CONVEYOR_READY){
 //        convReady = true;
-//        lcdSetTextPos(1, 4);
+//        lcdSetTextPos(1, 5);
 //        lcdWrite("Conveyor OK");
 //      }     
 //     }
-//     sysReady = (inReady && outReady && convReady);
+//     sysReady = (inReady && convReady); //&& outReady );
+//
 //   }
    //lcdWrite(char(0x0c));
 
-  
   return true;
 }
