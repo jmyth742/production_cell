@@ -148,19 +148,18 @@ static void deposit_state(void){
 //input robot
 int main() {
   //intereval time
-//  uint32_t timeElapsed = 0;
+  uint32_t timeElapsed = 0;
   //global variables
   canMessage_t rxMsg;
   canMessage_t txMsg;
   int current_state=0;
-//  int previous_state=0; 
   int tries = 0;
   
  
   /* Initialise the hardware */
   bspInit();
   robotInit();
-//  initWatch();
+  initWatch();
 
   init_state();
  //main while loop for messages
@@ -168,10 +167,10 @@ int main() {
     
    //READY STATE 
      while(current_state==ready){
-       // previous_state=ready;
+  interfaceLedToggle(D1_LED);
 
           if (canReady(CAN_PORT_1)) {  
-              //interfaceLedToggle(D1_LED);
+              
               canRead(CAN_PORT_1, &rxMsg);
           }
           if(rxMsg.id==INPUT_ROBOT_ID){
@@ -180,7 +179,7 @@ int main() {
                  case INPUTPAD_LOADED : 
                      lcdSetTextPos(2, 1);
                      lcdWrite("receive:%04x", rxMsg.dataA);
-                     //interfaceLedToggle(D2_LED);
+                    
                      pick_up_state();
                 
                      txMsg.id = CONTROLLER_ID;
@@ -195,19 +194,19 @@ int main() {
                      current_state = attempt_pickup;
                   break;
                  //ERROR MESSAGE
-//                case ERROR :
-//                     current_state=error_state;
-//                break; /* optional */
-//                case STOP :
-//                     current_state = stop_state;
-//                break; /* optional */
+                case ERROR :
+                            current_state=error_state;
+                break; /* optional */
+                case STOP :
+                     current_state = stop_state;
+                break; /* optional */
                                         }
             }
      }
     
       //ATTEMPT PICK UP STATE 
      while(current_state==attempt_pickup){
-       //previous_state=attempt_pickup;
+       interfaceLedToggle(D2_LED);
           lcdSetTextPos(2, 5);
           lcdWrite("state:%02u",current_state);
              if (canReady(CAN_PORT_1)) {  
@@ -250,12 +249,12 @@ int main() {
                                       
                                     current_state=attempt_pickup;
                         break;
-//                      case ERROR :
-//                                   current_state=error_state;
-//                      break; /* optional */
-//                      case STOP :
-//                     current_state = stop_state;
-//                      break; /* optional */
+                      case ERROR :
+                                   current_state=error_state;
+                      break; /* optional */
+                      case STOP :
+                     current_state = stop_state;
+                      break; /* optional */
                 }
                                      }
                                       }   
@@ -263,11 +262,10 @@ int main() {
    
    //BLOCK LIFTED STATE
      while(current_state==block_lifted){
-      // previous_state=block_lifted;
+       interfaceLedToggle(D3_LED);
           lcdSetTextPos(2, 5);
           lcdWrite("state:%02u",current_state);
               if (canReady(CAN_PORT_1)) {  
-                      interfaceLedToggle(D2_LED);
                       canRead(CAN_PORT_1, &rxMsg);
                       lcdSetTextPos(2, 4);
                       lcdWrite("recieve:%04x", rxMsg.dataA);
@@ -278,42 +276,43 @@ int main() {
                       deposit_state();
                       current_state= deposit_completed;
                 break;
-//                case ERROR :
-//                     current_state=error_state;
-//                break; /* optional */
-//                case STOP :
-//                     current_state = stop_state;
-//                break; /* optional */
+                case ERROR :
+                     current_state=error_state;
+                break; /* optional */
+                case STOP :
+                     current_state = stop_state;
+                break; /* optional */
                       }
    }
      }
      
      //DEPOSIT COMPLETE STATE
      while(current_state==deposit_completed){
-       //previous_state = deposit_completed;
+              interfaceLedToggle(D4_LED);
               init_state();
               current_state=ready;
     }
     
-//         while(current_state==error_state){
-//              robotInit();
-//              if(canReady(CAN_PORT_1)){
-//                canRead(CAN_PORT_1, &rxMsg);
-//                  if(rxMsg.dataA==STARTUP){
-//                  init_state();
-//                  current_state=ready;
-//                  }
-//              }
-//  }
-//  
-//           while(current_state==stop_state){
-//              if(canReady(CAN_PORT_1)){
-//                canRead(CAN_PORT_1, &rxMsg);
-//                  if(rxMsg.dataA==START){
-//                  current_state=previous_state;
-//                  }
-//              }
-//  }
+         while(current_state==error_state){
+              robotInit();
+              if(canReady(CAN_PORT_1)){
+                canRead(CAN_PORT_1, &rxMsg);
+                  if(rxMsg.dataA==STARTUP){
+                  init_state();
+                  current_state=ready;
+                  }
+              }
+  }
+  
+           while(current_state==stop_state){
+              if(canReady(CAN_PORT_1)){
+                canRead(CAN_PORT_1, &rxMsg);
+                  if(rxMsg.dataA==STARTUP){
+                  init_state();
+                  current_state=ready;
+                  }
+              }
+  }
   }
   
 }
