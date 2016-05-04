@@ -7,7 +7,7 @@
  * Conveyor sensor 2 reported  on interface LED 2 and CONNECT LED
  *
  * item sensed at 1 and moving n reverse -> stop
- * item sensed at 2 and moving 
+ * item sensed at 2 and  
  */
 
 #include <stdbool.h>
