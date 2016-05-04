@@ -4,7 +4,8 @@
  *    L,R -> stop
  * 
  * Conveyor sensor 1 reported  on interface LED 1 and LINK LED
- * Conveyor sensor 2 reported  on interface LED 2 and CONNECT LED
+ * Conveyor sensor 2 
+on interface LED 2 and CONNECT LED
  *
  * item sensed at 1 and  n reverse -> stop
  * item sensed  2   
