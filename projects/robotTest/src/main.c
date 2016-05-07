@@ -240,6 +240,7 @@ int main() {
                                     txMsg.len = 4;
                                     txMsg.dataA = PICKUP_ATTEMPTED;
                                     canWrite(CAN_PORT_1, &txMsg);
+                                    //error caused if the robot arm gets over 3 tries
                                     if(tries==3){
                                     lcdSetTextPos(2, 6);
                                     lcdWrite("too many tries");
