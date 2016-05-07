@@ -149,8 +149,10 @@ int main() {
   //global variables
   canMessage_t rxMsg;
   canMessage_t txMsg;
-  int current_state=0;
-  int tries = 0;
+  //for previous state pause/unpause
+  uint8_t previous_state;
+  uint8_t current_state=0;
+  uint8_t tries = 0;
   
  
   /* Initialise the hardware */
