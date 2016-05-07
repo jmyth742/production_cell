@@ -54,7 +54,7 @@ enum state {//init_checks,
 
 
 
-
+//individual robot arm movements 
 
 static void open_hand(void){
    while(robotJointGetState(ROBOT_HAND) > HAND_MIN){
