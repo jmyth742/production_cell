@@ -112,7 +112,7 @@ static void elbow_position(void){
      }
 }
 
-
+//state movements. 
 
 static void init_state(void){
 open_hand();
