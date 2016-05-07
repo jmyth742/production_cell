@@ -41,7 +41,7 @@ enum {
   
 };
    
-
+//all states possible within the state machine
 enum state {//init_checks,
             ready,
             attempt_pickup,
@@ -54,7 +54,7 @@ enum state {//init_checks,
 
 
 
-//individual robot arm movements 
+//individual robot arm movements with debug
 
 static void open_hand(void){
    while(robotJointGetState(ROBOT_HAND) > HAND_MIN){
