@@ -16,6 +16,7 @@ enum {PWM_MAJOR_CYCLE_HZ = 50};
  * e.g. HAND_MIN 45000 means the minimum value of the duty cycle
  * for the hand joint is 45000/1000000 of the major cycle time,
  * i.e. duty cycle time = (20 * (45000/1000000) = 0.9ms
+ ADD EXTRA ROBOT POSITIONS
  */
 enum {
   DUMMY_MIN = 45000,
