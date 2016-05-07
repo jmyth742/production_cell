@@ -1,8 +1,5 @@
-/* Test Robot
- * Joystick UP    -> inc current joint coordinate
- * Joystick DOWN  -> dec current joint coordinate
- * Joystick RIGHT -> cycle joint selection HAND -> WRIST -> ELBOW -> WAIST
- * Joystick left  -> cycle joint selection HAND <- WRIST <- ELBOW <- WAIST
+/* Input robot !!
+
  */
 #include <stdbool.h>
 #include <ucos_ii.h>
