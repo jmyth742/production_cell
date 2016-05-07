@@ -12,6 +12,7 @@ typedef emum mType{
     START,
     ERROR,
     PAUSE,
+    UNPAUSE,
     STOP,
     INPUT_READY,
     OUTPUT_READY,
